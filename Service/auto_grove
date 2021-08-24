@@ -1,0 +1,77 @@
+config-pin p9_21 gpio
+config-pin p9_22 gpio
+gpio clear 30
+gpio clear 31
+gpio clear 48
+gpio clear 5
+gpio clear 13
+gpio clear 3
+gpio clear 49
+gpio clear 115
+gpio clear 20
+gpio clear 60
+gpio clear 50
+gpio clear 51
+gpio clear 4
+gpio clear 12
+gpio clear 2
+gpio clear 15
+gpio clear 14
+gpio clear 112
+gpio clear 7
+gpio clear 66
+gpio clear 69
+gpio clear 45
+gpio clear 23
+gpio clear 47
+gpio clear 27
+gpio clear 22
+gpio clear 67
+gpio clear 68
+gpio clear 44
+gpio clear 26
+gpio clear 46
+gpio clear 65
+while [ 1 ];
+do
+#	gpio set 2
+#	gpio set 3
+#	i2cdetect -r -y 2 
+#	sleep 0.5
+#	gpio clear 2
+#	gpio clear 3
+	gpio clear 30
+	gpio clear 31
+	gpio clear 48
+	gpio clear 5
+	gpio clear 13
+	gpio clear 3
+	gpio clear 49	
+	gpio clear 115
+	gpio clear 20
+	gpio clear 60
+	gpio clear 50
+	gpio clear 51
+	gpio clear 4
+	gpio clear 12
+	gpio clear 2
+	gpio clear 15
+	gpio clear 14
+	gpio clear 112
+	gpio clear 7
+	gpio clear 66
+	gpio clear 69
+	gpio clear 45
+	gpio clear 23
+	gpio clear 47
+	gpio clear 27
+	gpio clear 22
+	gpio clear 67
+	gpio clear 68
+	gpio clear 44
+	gpio clear 26
+	gpio clear 46
+	gpio clear 65
+	sleep 0.5
+
+done

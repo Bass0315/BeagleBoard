@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /home/debian/re_script
+source ~/.bashrc
+./auto_grove
+exit 0
+

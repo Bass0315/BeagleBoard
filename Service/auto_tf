@@ -1,0 +1,12 @@
+mount /dev/mmcblk0p1 /mnt
+sleep 1
+while [ 1 ];
+do 
+	rm -rf /mnt/*.file
+	ls /dev/mmcblk0*
+	if [ "$?" -eq 0 ]; then
+		dd if=/dev/zero of=/mnt/50M.file bs=1M count=50 && leds 2 on
+	fi
+	sleep 0.5
+	leds 2 off
+done

@@ -1,0 +1,13 @@
+mount /dev/sda1 /media
+sleep 1
+while [ 1 ];
+do
+	rm -rf /media/*.file
+#	lsusb > log
+#	r=$(grep -o Bus log | wc -l)
+#	if [ "$r" -eq 3 ]; then
+	dd if=/dev/zero of=/mnt/50M.file bs=1M count=50 && leds 3 on
+#	fi
+	sleep 0.2
+	leds 3 off
+done
