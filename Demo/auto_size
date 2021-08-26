@@ -1,0 +1,22 @@
+#!/bin/bash
+nr_sectors=$(cat /sys/block/mmcblk1/size)
+sect_size=$(cat /sys/block/mmcblk0/queue/hw_sector_size)
+r=$(echo "scale=3; ${nr_sectors}*${sect_size}/1024/1024/1024" | bc)
+echo "eMMc size is: ", $r "G"
+if [ $(echo "$r >= 3.4"|bc) = 1 ]; then 
+    echo "on board eMMc size OK"
+else
+    echo "on board eMMc size FAIL"
+    exit 1
+fi 
+
+n=`cat /proc/meminfo`
+size=${n:18:6}
+echo "DDR size is: ", $size" Byte"
+if [ $size -gt 480000 ]; then        #stand ddr size: 495024
+    echo "on board DDR size OK"
+else
+    echo "on board DDR size FAIL"
+    exit 2
+fi
+exit 0

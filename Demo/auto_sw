@@ -1,0 +1,3 @@
+leds all on
+gpio_button -t 100 JigButton=67
+leds all off

@@ -1,0 +1,62 @@
+
+re_sta=0
+#change borad pins as gpio
+borad_pins=("P1_06" "P1_08" "P1_10" "P1_12" "P1_20" "P1_29" "P1_30" "P1_31" "P1_32" "P1_33" "P1_35" "P1_36" "P2_01" "P2_05" "P2_07" "P2_09" "P2_11" "P2_25" "P2_27" "P2_28" "P2_29" "P2_30" "P2_31" "P2_32" "P2_34")
+	
+for i in $(seq 0 $((${#borad_pins[*]}-1))) 
+do
+    config-pin ${borad_pins[$i]} gpio
+    # do something....
+done
+r=$?
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[Pins as GPIO] ========"
+    echo "text&Pins as GPIO#ok" > status/s_P1
+else
+    echo "========== FAIL[Pins as GPIO] ========"
+    echo "text&Pins as GPIO#failed" > status/s_P1 
+    re_sta=1
+fi
+
+
+# #debug test
+#mcu_pins=(87 89 109 5 2 3 4 20 12 13 117 43 114 42 111 26 88 110)
+#mcu_pins=(50 59 23 58 30 57 31 60 15 52 14 65 47 27 64 46 44 41 40 116 7 113 19 112 45 115 86)
+# for i in $(seq 0 $((${#mcu_pins[*]}-1))) 
+# do
+    # gpio set ${mcu_pins[$i]}
+	# echo ${mcu_pins[$i]}
+	# #gpio clear ${mcu_pins[$i]}.
+# done 
+
+
+#P1
+gpio_pairs 87,89 5,2 3,4 26,110 88,111 114,117> /dev/null
+#P2
+gpio_pairs 59,58 57,60 52,47 64,46 44,116 112,115 86,45 19,7 40,41 27,65 14,15 31,30 23,50> /dev/null
+
+#P1 test
+gpio_pairs 87,89 5,2 3,4 26,110 88,111 114,117
+r=$?
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[P1] ========"
+    echo "text& P1 #ok" > status/s_P1
+else
+    echo "========== FAIL[P1] ========"
+    echo "text& P1 #failed" > status/s_P1
+    re_sta=1
+fi
+
+#P2 test
+gpio_pairs 59,58 57,60 52,47 64,46 44,116 112,115 86,45 19,7 40,41 27,65 14,15 31,30 23,50
+r=$?
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[P2] ========"
+    echo "text& P2 #ok" > status/s_P2
+else
+    echo "========== FAIL[P2] ========"
+    echo "text& P2 #failed" > status/s_P2
+    re_sta=1
+fi
+
+exit $re_sta

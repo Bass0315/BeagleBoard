@@ -1,0 +1,9 @@
+./auto_adc 
+r=$? 
+if [ "$r" -eq 0 ]; then 
+	echo "========== OK[ Ethernet ] ========" 
+	echo "OK[ Ethernet ]" >> oled.txt
+else 
+	echo "========== FAIL[ Ethernet ] ========" 
+	echo "FAIL[ Ethernet ]" >> oled.txt
+fi

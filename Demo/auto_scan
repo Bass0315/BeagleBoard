@@ -1,0 +1,34 @@
+#!/bin/bash
+# tary, 2018-10-19 10:54
+
+TRIES=3
+eepid=""
+
+leds all off
+#leds -t 1000 0 &
+#pid_leds=$!
+
+for (( i = 0; i < $TRIES; i++ )); do
+	#eepid=PBA2B202106000026   #debug
+	if [ $((i%2)) ]; then
+		leds 3 on
+	else
+		leds 3 off
+	fi
+	sleep 0.5
+	eepid=$(python barcode.py)
+	[[ $eepid =~ ^[BBBIVC[0-9]{18}$ ]] && break;
+	[[ $eepid =~ ^[BBBVC[0-9]{17}$ ]] && break;
+	[[ $eepid =~ ^[PBA2B[0-9]{17}$ ]] && break;  #include /PBA2B/ ,so it si 17  
+done
+if [ $i -ge $TRIES ]; then
+	exit 1
+fi
+#kill -9 "$pid_leds"
+
+leds all off
+echo $eepid
+echo -ne "$eepid" > bar_code.tmp
+
+exit $r
+

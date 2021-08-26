@@ -1,0 +1,69 @@
+#!/bin/bash
+# tary, 14:16 2018/7/25
+
+SYS_DIR=/sys/bus/iio/devices/iio\:device0
+
+cd $SYS_DIR
+re_sta=0
+function adc_read() {
+	r0=$(cat in_voltage0_raw)
+	r1=$(cat in_voltage1_raw)
+	r2=$(cat in_voltage2_raw)
+	r3=$(cat in_voltage3_raw)
+        r4=$(cat in_voltage4_raw)
+#        r5=$(cat in_voltage5_raw)
+#        r6=$(cat in_voltage6_raw)
+
+	#PocketBeagle_1V8 
+        Vin0=$(( r0 * 1800 / 4096 ))
+	Vin1=$(( r1 * 1800 / 4096 ))
+	Vin2=$(( r2 * 1800 / 4096 ))
+        Vin3=$(( r3 * 1800 / 4096 ))
+        Vin4=$(( r4 * 1800 / 4096 ))
+
+	#PocketBeagle_3V3
+#        Vin5=$(( r5 * 1800 / 4096 ))
+#	Vin6=$(( r6 * 1800 / 4096 ))
+
+
+       echo "RAW0/mV0 RAW1/mV1 RAW2/mV2 RAW3/mV3 RAW4/mV4"
+       echo $r0/$Vin0 $r1/$Vin1 $r2/$Vin2 $r3/$Vin3 $r4/$Vin4
+
+#	echo "RAW0/mV0 RAW1/mV1 RAW2/mV2 RAW3/mV3 RAW4/mV4 RAW5/mV5 RAW6/mV6"
+#	echo $r0/$Vin0 $r1/$Vin1 $r2/$Vin2 $r3/$Vin3 $r4/$Vin4 $r5/$Vin5 $r6/$Vin6
+}
+
+adc_read
+echo "AD0 OK Value: 1.242V - 1.458V, Read Value: " $Vin0 "mV"
+echo "AD1 OK Value: 0.828V - 0.972V, Read Value: " $Vin1 "mV"
+echo "AD2 OK Value: 0.414V - 0.486V, Read Value: " $Vin2 "mV"
+echo "AD3 OK Value: 1.349V - 1.584V, Read Value: " $Vin3 "mV"
+echo "AD4 OK Value: 1.012V - 1.188V, Read Value: " $Vin4 "mV"
+#echo "AD5 OK Value: 0.675V - 0.792V, Read Value: " $Vin5 "mV"
+#echo "AD6 OK Value: 0.337V - 0.396V, Read Value: " $Vin6 "mV"
+
+# vin0 < 1.458V, vin0 > 1.242V
+[ $Vin0 -lt 577  -a  $Vin0 -gt 522 ] || { echo "========== FAIL[AD0] ========"; re_sta=1; }
+
+# vin1 < 0.972V, vin1 > 0.828V
+[ $Vin1 -lt 787  -a  $Vin1 -gt 712 ] || { echo "========== FAIL[AD1] ========"; re_sta=1; }
+
+# vin2 < 0.486V, vin2 > 0.414V
+[ $Vin2 -lt 945  -a  $Vin2 -gt 855 ] || { echo "========== FAIL[AD2] ========"; re_sta=1; }
+
+# vin3 < 1.584V, vin3 > 1.349V
+[ $Vin3 -lt 682  -a  $Vin3 -gt 617 ] || { echo "========== FAIL[AD3] ========"; re_sta=1; }
+
+# vin4 < 1.188V, vin0 > 1.012V
+[ $Vin4 -lt 1732  -a  $Vin4 -gt 1567 ] || { echo "========== FAIL[AD4] ========"; re_sta=1; }
+
+# vin5 < 0.792V, vin5 > 0.675V
+#[ $Vin5 -lt 792  -a  $Vin5 -gt 675 ] || { echo "========== FAIL[AD5] ========"; exit 6; }
+
+# vin6 < 0.396V, vin6 > 0.337V
+#[ $Vin6 -lt 396  -a  $Vin6 -gt 337 ] || { echo "========== FAIL[AD6] ========"; exit 7; }
+
+
+echo "========== OK[AD Port] ========";
+exit $resta
+

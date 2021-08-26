@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. $(dirname $0)/aux-funcs
+
+ifconfig eth0 up  > /dev/null
+dhclient eth0 > /dev/null 2>&1
+ifconfig
+# ping -c 3 -I eth0 $(get_gateway) > /dev/null
+ping -l 8 -c 8 -I eth0 $(get_gateway) 2>&1 
+r=$?
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[Eth0] ========"
+    exit 0
+else
+    echo "========== FAIL[Eth0] ========"
+    exit 1
+fi

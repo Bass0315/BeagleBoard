@@ -1,0 +1,50 @@
+##!/bin/bash tary, 2018-10-19 10:54
+
+# BBB
+version=EIA0
+year="`date +%Y`"
+week="`date +%2W`"
+eepid=`cat bar_code.tmp`
+
+if [ ${#eepid} -eq 18 ]; then
+    echo "Model is: BeagleBone Black Industry"
+    serial_bar=${eepid:6}
+    serial=${year:2:2}${week}SBI${serial_bar:7:5}
+    echo "102110423" > sku
+    echo "Serial write to EEPROM is: "$serial
+fi
+
+if [ ${#eepid} -eq 17 ]; then
+	if [[ ${eepid} == *"PBA2B"* ]]; then
+		version=00A2
+		echo "Model is: PocketBeagle Industry"
+		#serial_bar=${eepid:6}
+		serial=${year:2:2}${week}SPB${eepid:12:5}
+		echo "102110423" > sku
+		echo "Serial write to EEPROM is: "$serial
+	else
+		echo "Model is: BeagleBone Black"
+		serial_bar=${eepid:5}
+		serial=${year:2:2}${week}SBB${serial_bar:7:5}
+		echo "102110420" > sku
+		echo "Serial write to EEPROM is: "$serial
+	fi
+fi
+
+config=$(date +%s)
+python eeprom_rw.py $version $serial $config; r=$?
+
+echo $serial
+
+leds all off
+
+echo -ne "$eepid" > bar_code.tmp
+
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[EEPROM] ========"
+    exit 0
+else
+    echo "========== FAIL[EEPROM] ========"
+    exit 1
+fi
+

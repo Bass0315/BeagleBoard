@@ -1,0 +1,7 @@
+
+cd /opt/EMSTS/
+
+./bbb_produce
+
+exit 0
+

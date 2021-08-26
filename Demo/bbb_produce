@@ -1,0 +1,195 @@
+#!/bin/bash
+#
+# Copyright (c) 2018 turmary <turmary@126.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+export PATH=/opt/EMSTS/:$PATH;
+export AUDIODEV="plughw:CARD=Black,DEV=0"
+export SDL_NOMOUSE=1
+
+# .log file content
+set -x
+logthis=/var/log/$(basename $0).log
+exec 3>&1
+exec 1>$logthis 2>&1
+date
+logtest=`mktemp`  #建立暂存文件
+
+
+finish_report_flag=1
+
+python Seeed_OLED_1.12_background.py "60" "2" "SH1107G" &    #Run the OLED display in the background.
+oled_process=$!
+
+leds -t 1000 0 &
+leds_process=$!
+
+#---------------------------------------- funtion ---------------------------------------------------------#
+function result_report() {
+ 
+	result_path=/var/bbb_log/
+	
+	#get barcode 
+	result_name=$(cat bar_code.tmp)
+
+	# Add time to result file name
+	now=`TZ='Asia/Shanghai' date +"%Y%m%d-%H%M%S"`
+	result_name=${result_name}_T${now}          #exsmple: result_name=BBBIVC202011022614_T20210126-020331
+	sync 
+	
+	#file name/finish result/finish log content
+	if (( $finish_report_flag == 1 ));then
+		result_name=${result_name}_TEST_OK.log  #exsmple:result_name=BBBIVC202011022614_T20210126-020331_OK.log
+		echo "========== OK[ ALL Test ] ========" > status/s_result
+	else
+		result_name=${result_name}_TEST_FAIL.log
+		echo "========== FAIL[ Test ] ========" > status/s_result
+	fi	
+	
+	echo RESULT_NAME=$result_name
+	cp  $logtest    "$result_path$result_name"
+	cat $logthis >> "$result_path$result_name"
+	sync
+	
+	# upload test log/results
+	for (( i = 0; i < 100; i++ )); do 
+		python $(dirname $0)/oss_operate_upload.py "$result_name" "$result_path$result_name"
+		r=$?
+		[ "$r" -eq 0 ] && break
+	done		
+	sync
+}
+#----------------------------------------------------------------------------------------------#
+
+leds all off
+
+
+#GPIO
+./PocketBeagle_auto_gpio
+r=$?
+if [ "$r" -eq 0 ]; then
+        echo "========== OK[ GPIO ] ========"
+        echo "OK[ GPIO ]" >> oled.txt
+else
+        echo "========== FAIL[ GPIO ] ========"
+        echo "FAIL[ GPIO ]" >> oled.txt
+        finish_report_flag=0
+fi
+
+
+sleep 5
+
+#ethernet
+#./usb_ethernet
+ping -c 5 www.baidu.com
+r=$?
+if [ "$r" -eq 0 ]; then
+        echo "=== OK[ Ethernet ] ==="
+        echo "OK[ Eth ]" >> oled.txt
+else
+        echo "=== FAIL[ Ethernet ] ==="
+        echo "FAIL[ Eth ]" >> oled.txt
+        finish_report_flag=0
+fi
+
+
+#ADC
+./auto_adc
+r=$?
+if [ "$r" -eq 0 ]; then
+        echo "========== OK[ ADC ] ========"
+        echo "OK[ ADC ]" >> oled.txt
+else
+        echo "========== FAIL[ ADC ] ========"
+        echo "FAIL[ ADC ]" >> oled.txt
+	finish_report_flag=0
+fi
+
+./auto_miniusb
+r=$?
+if [ "$r" -eq 0 ]; then
+	echo "OK[ USB ]" >> oled.txt
+    echo "========== Start sanning barcode ========"
+	./auto_scan                   #barcod is saved in bar_code.tmp
+	r=$?
+	if [ "$r" -eq 1 ]; then       #why ((r == 1)) is fail,please open auto_scan
+ 		echo "========== FAIL[ barcode ] ========"
+		echo "FAIL[ barcode ]" >> oled.txt
+		finish_report_flag=0
+	else
+		echo "========== OK[ barcode ] ========"
+		echo "OK[ barcode ]" >> oled.txt
+	fi
+else
+	echo "FAIL[ USB ]" >> oled.txt
+    echo "========== Please check the ethernet ========"
+	finish_report_flag=0
+fi
+
+
+#eeprom
+gpio clear 20
+./auto_eepromid
+r=$?
+if [ "$r" -eq 0 ]; then      
+ 	echo "========== OK[ Write eepromid ] ========"
+	echo "OK[Weepromid]" >> oled.txt
+else
+	echo "========== FAIL[ Write eepromid ] ========"
+	echo "FAIL[Weepromid]" >> oled.txt
+	finish_report_flag=0
+fi
+gpio set 20
+
+./read_eeprom
+r=$?
+if [ "$r" -eq 0 ]; then      
+ 	echo "========== OK[ Read eepromid ] ========"
+	echo "OK[Reepromid]" >> oled.txt
+else
+	echo "========== FAIL[ Read eepromid ] ========"
+	echo "FAIL[Reepromid]" >> oled.txt
+	finish_report_flag=0
+fi
+
+if (($finish_report_flag == 0)); then
+        echo "FAIL[ALL Test]" >> oled.txt
+	gpio cler 42
+else
+        echo "OK[ALL Test]" >> oled.txt
+	gpio clear 43
+fi
+
+
+#report and alicloud	
+result_report 
+
+sleep 0.5
+
+#delete local path test log
+echo "" > oled.txt
+rm -f $result_path$result_name
+
+kill -9 "$leds_process"
+kill -9 "$oled_process"
+
+leds all on
+# #stop this service about auto aging test
+systemctl stop factoryCheck
+

@@ -1,0 +1,26 @@
+gpio_pairs 44,46 26,65 > /dev/null
+gpio_pairs 30,5 31,3 48,49 115,60 50,2 51,15 4,14 112,13 7,12 > /dev/null
+
+gpio_pairs 44,46 26,65
+r=$?
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[GPIO8] ========"
+    echo "text&gpio8#ok" > status/s_gpio8
+else
+    echo "========== FAIL[GPIO8] ========"
+    echo "text&gpio8#failed" > status/s_gpio8
+    exit 11
+fi
+
+gpio_pairs 30,5 31,3 48,49 115,60 50,2 51,15 4,14 112,13 7,12
+r=$?
+if [ "$r" -eq 0 ]; then
+    echo "========== OK[GPIO9] ========"
+    echo "text&gpio9#ok" > status/s_gpio9
+else
+    echo "========== FAIL[GPIO9] ========"
+    echo "text&gpio9#failed" > status/s_gpio9
+    exit 12
+fi
+
+exit 0

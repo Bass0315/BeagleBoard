@@ -1,0 +1,2 @@
+eeprom=/sys/devices/platform/ocp/44e0b000.i2c/i2c-0/0-0050/eeprom
+hexdump -C -v -n 128 -s 0 $eeprom

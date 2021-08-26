@@ -1,0 +1,10 @@
+ls /dev/input/by-path -l
+ls /dev/input/by-path/ > usb_log
+r=$(grep -o kbd usb_log | wc -l)
+if [ "$r" -eq 1 ]; then
+    echo "========== OK[MiniUSB] ========"
+    exit 0
+else
+    echo "========== FAILED[MiniUSB] ========"
+    exit 1
+fi

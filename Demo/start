@@ -1,0 +1,86 @@
+#!/bin/sh
+config-pin p9_19 gpio
+config-pin p9_20 gpio
+#-------------------------------#
+./auto_size
+r=$?
+if [ $r -ne "0" ]; then
+        echo "text&emmc#failed" > status/s_emmc
+        exit $r
+fi
+echo "text&emmc#ok" > status/s_emmc
+echo "" ; echo ""
+#-------------------------------#
+./auto_sw
+r=$?
+if [ $r -ne "0" ]; then
+        echo "text&sw#failed" > status/s_sw
+	exit $r
+fi
+echo "text&sw#ok" > status/s_sw
+gpio clear 66
+echo "" ; echo ""
+#-------------------------------#
+./auto_gpio
+r=$?
+if [ $r -ne "0" ]; then
+	exit $r
+fi
+gpio clear 69
+echo "" ; echo ""
+#-------------------------------#
+./auto_adc
+r=$?
+if [ $r -ne "0" ];then
+        echo "text&adc#failed" > status/s_adc
+        exit $r
+fi
+echo "text&adc#ok" > status/s_adc
+gpio clear 45
+echo "" ; echo ""
+#-------------------------------#
+./auto_ethernet
+r=$?
+if [ $r -ne "0" ]; then
+        echo "text&eth0#failed" > status/s_ethernet
+        exit $r
+fi
+echo "text&eth0#ok" > status/s_ethernet
+gpio clear 23
+echo "" ; echo ""
+#-------------------------------#
+./auto_debug
+r=$?
+if [ $r -ne "0" ]; then
+        echo "text&debug#failed" > status/s_debug
+        exit $r
+fi
+echo "text&debug#ok" > status/s_debug
+gpio clear 47
+echo "" ; echo ""
+
+#-------------------------------#
+./auto_miniusb
+r=$?
+if [ $r -ne "0" ]; then
+        echo "text&miniusb#failed" > status/s_miniusb
+        exit $r
+fi
+echo "text&miniusb#ok" > status/s_miniusb
+gpio clear 27
+echo "" ; echo ""
+
+#-------------------------------#
+./auto_eepromid
+r=$?
+if [ $r -ne "0" ];then
+        echo "text&eeprom#failed" > status/s_eeprom
+	exit $r
+fi
+echo "text&eeprom#ok" > status/s_eeprom
+gpio clear 22
+hexdump -C -v -n 128 -s 0 /sys/devices/platform/ocp/44e0b000.i2c/i2c-0/0-0050/eeprom
+echo "" ; echo ""
+#-------------------------------#
+
+exit 0

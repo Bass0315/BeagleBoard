@@ -1,0 +1,21 @@
+#User:root  Path:/root/
+
+sudo echo 'nameserver 114.114.114.114' > /opt/EMSTS/resolv.conf 
+
+sudo route add default gw 192.168.7.1
+
+sudo cp /opt/EMSTS/resolv.conf /run/connman/resolv.conf
+ 
+sudo service networking restart sleep 0.5
+
+#test ethernet
+ping -c 8 wwww.baidu.com 
+
+r=$? 
+if [ "$r" -eq 0 ]; then 
+	echo "========== OK[ USB Eth ] ========"
+	#exit 0
+else 
+	echo "========== FAIL[ USB Eth ] ========"
+	#exit 1
+fi
